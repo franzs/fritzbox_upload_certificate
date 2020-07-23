@@ -25,10 +25,16 @@ if [ -z "${md5cmd}" ]; then
   exit 1
 fi
 
-if ! which curl > /dev/null; then
-  echo "Please install curl!" >&2
-  exit 1
-fi
+exit=0
+
+for cmd in curl iconv; do
+  if ! which ${cmd} > /dev/null; then
+    echo "Please install ${cmd}" >&2
+    exit=1
+  fi
+done
+
+[ ${exit} -ne 0 ] && exit ${exit}
 
 while getopts ":b:c:p:u:h" opt; do
   case ${opt} in
