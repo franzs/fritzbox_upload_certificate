@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# default parameter from environment
+# default parameters from environment
 baseurl="${FRITZBOX_BASEURL:-}"
 certpath="${FRITZBOX_CERTPATH:-}"
 password="${FRITZBOX_PASSWORD:-}"
