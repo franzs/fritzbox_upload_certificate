@@ -11,6 +11,13 @@ function usage {
   exit 64
 }
 
+function error {
+  local msg=$1
+
+  [ "${msg}" ] && echo "${msg}" >&2
+  exit 1
+}
+
 md5cmd=
 
 for cmd in md5 md5sum; do
@@ -21,16 +28,14 @@ for cmd in md5 md5sum; do
 done
 
 if [ -z "${md5cmd}" ]; then
-  echo "Missing command for calculating MD5 hash" >&2
-  exit 1
+  error "Missing command for calculating MD5 hash"
 fi
 
 exit=0
 
 for cmd in curl iconv; do
   if ! which ${cmd} > /dev/null; then
-    echo "Please install ${cmd}" >&2
-    exit=1
+    error "Please install ${cmd}"
   fi
 done
 
@@ -80,8 +85,7 @@ done
 [ ${exit} -ne 0 ] && exit ${exit}
 
 if [ ! -r "${certpath}/fullchain.pem" -o ! -r "${certpath}/privkey.pem" ]; then
-  echo "Certpath ${certpath} must contain fullchain.pem and privkey.pem" >&2
-  exit 1
+  error "Certpath ${certpath} must contain fullchain.pem and privkey.pem"
 fi
 
 request_file="$(mktemp -t XXXXXX)"
@@ -90,16 +94,14 @@ trap "rm -f ${request_file}" EXIT
 # login to the box and get a valid SID
 challenge="$(curl -sS ${baseurl}/login_sid.lua | sed -ne 's/^.*<Challenge>\([0-9a-f][0-9a-f]*\)<\/Challenge>.*$/\1/p')"
 if [ -z "${challenge}" ]; then
-  echo "Invalid challenge received." >&2
-  exit 1
+  error "Invalid challenge received."
 fi
 
 md5hash="$(echo -n ${challenge}-${password} | iconv -f ASCII -t UTF16LE | ${md5cmd} | awk '{print $1}')"
 
 sid="$(curl -sS "${baseurl}/login_sid.lua?username=${username}&response=${challenge}-${md5hash}" | sed -ne 's/^.*<SID>\([0-9a-f][0-9a-f]*\)<\/SID>.*$/\1/p')"
 if [ -z "${sid}" -o "${sid}" = "0000000000000000" ]; then
-  echo "Login failed." >&2
-  exit 1
+  error "Login failed."
 fi
 
 # generate our upload request
