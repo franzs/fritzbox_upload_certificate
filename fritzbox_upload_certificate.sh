@@ -88,11 +88,16 @@ request_file="$(mktemp -t XXXXXX)"
 trap "rm -f ${request_file}" EXIT
 
 # login to the box and get a valid SID
-challenge="$(curl -sS ${baseurl}/login_sid.lua | sed -e 's/^.*<Challenge>//' -e 's/<\/Challenge>.*$//')"
-md5hash="$(echo -n ${challenge}-${password} | iconv -f ASCII -t UTF16LE | ${md5cmd} | awk '{print $1}')"
-sid="$(curl -sS "${baseurl}/login_sid.lua?username=${username}&response=${challenge}-${md5hash}" | sed -e 's/^.*<SID>//' -e 's/<\/SID>.*$//')"
+challenge="$(curl -sS ${baseurl}/login_sid.lua | sed -ne 's/^.*<Challenge>\([0-9a-f][0-9a-f]*\)<\/Challenge>.*$/\1/p')"
+if [ -z "${challenge}" ]; then
+  echo "Invalid challenge received." >&2
+  exit 1
+fi
 
-if [ "${sid}" = "0000000000000000" ]; then
+md5hash="$(echo -n ${challenge}-${password} | iconv -f ASCII -t UTF16LE | ${md5cmd} | awk '{print $1}')"
+
+sid="$(curl -sS "${baseurl}/login_sid.lua?username=${username}&response=${challenge}-${md5hash}" | sed -ne 's/^.*<SID>\([0-9a-f][0-9a-f]*\)<\/SID>.*$/\1/p')"
+if [ -z "${sid}" -o "${sid}" = "0000000000000000" ]; then
   echo "Login failed." >&2
   exit 1
 fi
