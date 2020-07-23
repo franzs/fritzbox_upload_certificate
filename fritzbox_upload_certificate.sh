@@ -35,7 +35,8 @@ exit=0
 
 for cmd in curl iconv; do
   if ! which ${cmd} > /dev/null; then
-    error "Please install ${cmd}"
+    echo "Please install ${cmd}" >&2
+    exit=1
   fi
 done
 
