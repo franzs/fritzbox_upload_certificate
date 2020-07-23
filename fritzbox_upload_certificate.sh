@@ -6,6 +6,9 @@ certpath="${FRITZBOX_CERTPATH:-}"
 password="${FRITZBOX_PASSWORD:-}"
 username="${FRITZBOX_USERNAME:-}"
 
+CURL_CMD=curl
+ICONV_CMD=iconv
+
 function usage {
   echo "Usage: $0 [-b baseurl] [-u username] [-p password] [-c certpath]" >&2
   exit 64
@@ -33,7 +36,7 @@ fi
 
 exit=0
 
-for cmd in curl iconv; do
+for cmd in ${CURL_CMD} ${ICONV_CMD}; do
   if ! which ${cmd} > /dev/null; then
     echo "Please install ${cmd}" >&2
     exit=1
@@ -93,14 +96,14 @@ request_file="$(mktemp -t XXXXXX)"
 trap "rm -f ${request_file}" EXIT
 
 # login to the box and get a valid SID
-challenge="$(curl -sS ${baseurl}/login_sid.lua | sed -ne 's/^.*<Challenge>\([0-9a-f][0-9a-f]*\)<\/Challenge>.*$/\1/p')"
+challenge="$(${CURL_CMD} -sS ${baseurl}/login_sid.lua | sed -ne 's/^.*<Challenge>\([0-9a-f][0-9a-f]*\)<\/Challenge>.*$/\1/p')"
 if [ -z "${challenge}" ]; then
   error "Invalid challenge received."
 fi
 
-md5hash="$(echo -n ${challenge}-${password} | iconv -f ASCII -t UTF16LE | ${md5cmd} | awk '{print $1}')"
+md5hash="$(echo -n ${challenge}-${password} | ${ICONV_CMD} -f ASCII -t UTF16LE | ${md5cmd} | awk '{print $1}')"
 
-sid="$(curl -sS "${baseurl}/login_sid.lua?username=${username}&response=${challenge}-${md5hash}" | sed -ne 's/^.*<SID>\([0-9a-f][0-9a-f]*\)<\/SID>.*$/\1/p')"
+sid="$(${CURL_CMD} -sS "${baseurl}/login_sid.lua?username=${username}&response=${challenge}-${md5hash}" | sed -ne 's/^.*<SID>\([0-9a-f][0-9a-f]*\)<\/SID>.*$/\1/p')"
 if [ -z "${sid}" -o "${sid}" = "0000000000000000" ]; then
   error "Login failed."
 fi
@@ -127,4 +130,4 @@ cat <<EOD >> ${request_file}
 EOD
 
 # upload the certificate to the box
-curl -sS -X POST ${baseurl}/cgi-bin/firmwarecfg -H "Content-type: multipart/form-data boundary=${boundary}" --data-binary "@${request_file}" | grep SSL
+${CURL_CMD} -sS -X POST ${baseurl}/cgi-bin/firmwarecfg -H "Content-type: multipart/form-data boundary=${boundary}" --data-binary "@${request_file}" | grep SSL
