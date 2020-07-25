@@ -9,6 +9,8 @@ username="${FRITZBOX_USERNAME:-}"
 CURL_CMD=curl
 ICONV_CMD=iconv
 
+SUCCESS_MESSAGES="^(Das SSL-Zertifikat wurde erfolgreich importiert\.|Import of the SSL certificate was successful\.|El certificado SSL se ha importado correctamente\.|Le certificat SSL a été importé\.|Il certificato SSL è stato importato\.|Import certyfikatu SSL został pomyślnie zakończony\.)$"
+
 function usage {
   echo "Usage: $0 [-b baseurl] [-u username] [-p password] [-c certpath]" >&2
   exit 64
@@ -130,4 +132,7 @@ cat <<EOD >> ${request_file}
 EOD
 
 # upload the certificate to the box
-${CURL_CMD} -sS -X POST ${baseurl}/cgi-bin/firmwarecfg -H "Content-type: multipart/form-data boundary=${boundary}" --data-binary "@${request_file}" | grep SSL
+${CURL_CMD} -sS -X POST ${baseurl}/cgi-bin/firmwarecfg -H "Content-type: multipart/form-data boundary=${boundary}" --data-binary "@${request_file}" | grep -qE "${SUCCESS_MESSAGES}"
+if [ $? -ne 0 ]; then
+  error "Could not import certificate."
+fi
