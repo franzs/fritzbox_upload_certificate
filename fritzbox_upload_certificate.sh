@@ -110,6 +110,8 @@ if [ -z "${sid}" -o "${sid}" = "0000000000000000" ]; then
   error "Login failed."
 fi
 
+certbundle=$(cat "${certpath}/fullchain.pem" "${certpath}/privkey.pem" | grep -v '^$')
+
 # generate our upload request
 boundary="---------------------------$(date +%Y%m%d%H%M%S)"
 
@@ -122,12 +124,7 @@ ${sid}
 Content-Disposition: form-data; name="BoxCertImportFile"; filename="BoxCert.pem"
 Content-Type: application/octet-stream
 
-EOD
-
-cat "${certpath}/fullchain.pem" "${certpath}/privkey.pem" | grep -v '^$' >> ${request_file}
-
-cat <<EOD >> ${request_file}
-
+${certbundle}
 --${boundary}--
 EOD
 
