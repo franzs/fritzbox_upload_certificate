@@ -33,4 +33,13 @@ export FRITZBOX_CERTPATH=./certificates/fritz.box
 ./fritzbox_upload_certificate.sh
 ```
 
+## Tested with
+
+| FRITZ!Box | FRITZ!OS | works? |
+| --------- | -------- | ------ |
+| 7360      | 6.86     | ✓      |
+| 7490      | 7.12     | ✓      |
+
+Let me know what your results are.
+
 ![GitHub](https://img.shields.io/github/license/franzs/fritzbox_upload_certificate)
