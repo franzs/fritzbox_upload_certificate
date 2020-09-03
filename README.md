@@ -35,11 +35,12 @@ export FRITZBOX_CERTPATH=./certificates/fritz.box
 
 ## Tested with
 
-| FRITZ!Box  | FRITZ!OS | works? |
-| ---------- | -------- | ------ |
-| 7360       | 6.86     | ✓      |
-| 7490       | 7.12     | ✓      |
-| 6490 Cable | 7.20     | ✓      |
+| Device                    | FRITZ!OS | works? |
+| ------------------------- | -------- | ------ |
+| FRITZ!Box 7360            | 6.86     | ✓      |
+| FRITZ!WLAN Repeater DVB-C | 7.01     | ✓      |
+| FRITZ!Box 7490            | 7.12     | ✓      |
+| FRITZ!Box 6490 Cable      | 7.20     | ✓      |
 
 Let me know what your results are.
 
