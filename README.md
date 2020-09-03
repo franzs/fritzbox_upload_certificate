@@ -35,10 +35,11 @@ export FRITZBOX_CERTPATH=./certificates/fritz.box
 
 ## Tested with
 
-| FRITZ!Box | FRITZ!OS | works? |
-| --------- | -------- | ------ |
-| 7360      | 6.86     | ✓      |
-| 7490      | 7.12     | ✓      |
+| FRITZ!Box  | FRITZ!OS | works? |
+| ---------- | -------- | ------ |
+| 7360       | 6.86     | ✓      |
+| 7490       | 7.12     | ✓      |
+| 6490 Cable | 7.20     | ✓      |
 
 Let me know what your results are.
 
