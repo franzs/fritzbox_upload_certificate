@@ -118,7 +118,7 @@ if [ -z "${challenge}" ]; then
   error "Invalid challenge received."
 fi
 
-md5hash="$(echo -n ${challenge}-${password} | ${ICONV_CMD} -f ASCII -t UTF16LE | ${md5cmd} | awk '{print $1}')"
+md5hash="$(echo -n ${challenge}-${password} | ${ICONV_CMD} -f ASCII -t UTF-16LE | ${md5cmd} | awk '{print $1}')"
 
 sid="$(${CURL_CMD} -sS "${baseurl}/login_sid.lua?username=${username}&response=${challenge}-${md5hash}" | sed -ne 's/^.*<SID>\([0-9a-f][0-9a-f]*\)<\/SID>.*$/\1/p')"
 if [ -z "${sid}" -o "${sid}" = "0000000000000000" ]; then
