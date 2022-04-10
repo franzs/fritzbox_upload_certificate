@@ -41,6 +41,7 @@ export FRITZBOX_CERTPATH=./certificates/fritz.box
 | FRITZ!WLAN Repeater DVB-C | 7.01     | ✓      |
 | FRITZ!Box 7490            | 7.12     | ✓      |
 | FRITZ!Box 6490 Cable      | 7.20     | ✓      |
+| FRITZ!Box 7590            | 7.29     | ✓      |
 
 Let me know what your results are.
 
