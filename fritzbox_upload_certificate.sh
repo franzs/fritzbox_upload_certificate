@@ -24,7 +24,7 @@ username="${FRITZBOX_USERNAME:-}"
 CURL_CMD=curl
 ICONV_CMD=iconv
 
-SUCCESS_MESSAGES="^(Das SSL-Zertifikat wurde erfolgreich importiert|Import of the SSL certificate was successful|El certificado SSL se ha importado correctamente|Le certificat SSL a été importé|Il certificato SSL è stato importato|Import certyfikatu SSL został pomyślnie zakończony)\.$"
+SUCCESS_MESSAGES="^ *(Das SSL-Zertifikat wurde erfolgreich importiert|Import of the SSL certificate was successful|El certificado SSL se ha importado correctamente|Le certificat SSL a été importé|Il certificato SSL è stato importato|Import certyfikatu SSL został pomyślnie zakończony)\.$"
 
 function usage {
   echo "Usage: $0 [-b baseurl] [-u username] [-p password] [-c certpath]" >&2
