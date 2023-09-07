@@ -105,7 +105,7 @@ done
 
 [ ${exit} -ne 0 ] && exit ${exit}
 
-if [ ! -r "${certpath}/fullchain.pem" -o ! -r "${certpath}/privkey.pem" ]; then
+if [ ! -r "${certpath}/fullchain.pem" ] || [ ! -r "${certpath}/privkey.pem" ]; then
   error "Certpath ${certpath} must contain fullchain.pem and privkey.pem"
 fi
 
@@ -121,7 +121,7 @@ fi
 md5hash="$(echo -n ${challenge}-${password} | ${ICONV_CMD} -f ASCII -t UTF-16LE | ${md5cmd} | awk '{print $1}')"
 
 sid="$(${CURL_CMD} -sS "${baseurl}/login_sid.lua?username=${username}&response=${challenge}-${md5hash}" | sed -ne 's/^.*<SID>\([0-9a-f][0-9a-f]*\)<\/SID>.*$/\1/p')"
-if [ -z "${sid}" -o "${sid}" = "0000000000000000" ]; then
+if [ -z "${sid}" ] || [ "${sid}" = "0000000000000000" ]; then
   error "Login failed."
 fi
 
