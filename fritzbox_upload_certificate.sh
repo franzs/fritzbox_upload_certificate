@@ -21,8 +21,8 @@ certpath="${FRITZBOX_CERTPATH:-}"
 password="${FRITZBOX_PASSWORD:-}"
 username="${FRITZBOX_USERNAME:-}"
 
-CURL_CMD=curl
-ICONV_CMD=iconv
+CURL_CMD="curl"
+ICONV_CMD="iconv"
 
 SUCCESS_MESSAGES="^ *(Das SSL-Zertifikat wurde erfolgreich importiert|Import of the SSL certificate was successful|El certificado SSL se ha importado correctamente|Le certificat SSL a été importé|Il certificato SSL è stato importato|Import certyfikatu SSL został pomyślnie zakończony)\.$"
 
@@ -41,7 +41,7 @@ function error {
 md5cmd=
 
 for cmd in md5 md5sum; do
-  if which ${cmd} > /dev/null 2>&1; then
+  if which "${cmd}" > /dev/null 2>&1; then
     md5cmd=${cmd}
     break
   fi
@@ -54,7 +54,7 @@ fi
 exit=0
 
 for cmd in ${CURL_CMD} ${ICONV_CMD}; do
-  if ! which ${cmd} > /dev/null 2>&1; then
+  if ! which "${cmd}" > /dev/null 2>&1; then
     echo "Please install ${cmd}" >&2
     exit=1
   fi
@@ -105,23 +105,23 @@ done
 
 [ ${exit} -ne 0 ] && exit ${exit}
 
-if [ ! -r "${certpath}/fullchain.pem" -o ! -r "${certpath}/privkey.pem" ]; then
+if [ ! -r "${certpath}/fullchain.pem" ] || [ ! -r "${certpath}/privkey.pem" ]; then
   error "Certpath ${certpath} must contain fullchain.pem and privkey.pem"
 fi
 
 request_file="$(mktemp -t XXXXXX)"
-trap "rm -f ${request_file}" EXIT
+trap 'rm -f "${request_file}"' EXIT
 
 # login to the box and get a valid SID
-challenge="$(${CURL_CMD} -sS ${baseurl}/login_sid.lua | sed -ne 's/^.*<Challenge>\([0-9a-f][0-9a-f]*\)<\/Challenge>.*$/\1/p')"
+challenge="$(${CURL_CMD} -sS "${baseurl}/login_sid.lua" | sed -ne 's/^.*<Challenge>\([0-9a-f][0-9a-f]*\)<\/Challenge>.*$/\1/p')"
 if [ -z "${challenge}" ]; then
   error "Invalid challenge received."
 fi
 
-md5hash="$(echo -n ${challenge}-${password} | ${ICONV_CMD} -f ASCII -t UTF-16LE | ${md5cmd} | awk '{print $1}')"
+md5hash="$(echo -n "${challenge}-${password}" | ${ICONV_CMD} -f ASCII -t UTF-16LE | ${md5cmd} | awk '{print $1}')"
 
 sid="$(${CURL_CMD} -sS "${baseurl}/login_sid.lua?username=${username}&response=${challenge}-${md5hash}" | sed -ne 's/^.*<SID>\([0-9a-f][0-9a-f]*\)<\/SID>.*$/\1/p')"
-if [ -z "${sid}" -o "${sid}" = "0000000000000000" ]; then
+if [ -z "${sid}" ] || [ "${sid}" = "0000000000000000" ]; then
   error "Login failed."
 fi
 
@@ -130,7 +130,7 @@ certbundle=$(cat "${certpath}/fullchain.pem" "${certpath}/privkey.pem" | grep -v
 # generate our upload request
 boundary="---------------------------$(date +%Y%m%d%H%M%S)"
 
-cat <<EOD >> ${request_file}
+cat <<EOD >> "${request_file}"
 --${boundary}
 Content-Disposition: form-data; name="sid"
 
@@ -144,7 +144,8 @@ ${certbundle}
 EOD
 
 # upload the certificate to the box
-${CURL_CMD} -sS -X POST ${baseurl}/cgi-bin/firmwarecfg -H "Content-type: multipart/form-data boundary=${boundary}" --data-binary "@${request_file}" | grep -qE "${SUCCESS_MESSAGES}"
+${CURL_CMD} -sS -X POST "${baseurl}/cgi-bin/firmwarecfg" -H "Content-type: multipart/form-data boundary=${boundary}" --data-binary "@${request_file}" | grep -qE "${SUCCESS_MESSAGES}"
+# shellcheck disable=SC2181
 if [ $? -ne 0 ]; then
   error "Could not import certificate."
 fi
