@@ -41,7 +41,7 @@ function error {
 md5cmd=
 
 for cmd in md5 md5sum; do
-  if which ${cmd} > /dev/null 2>&1; then
+  if which "${cmd}" > /dev/null 2>&1; then
     md5cmd=${cmd}
     break
   fi
@@ -54,7 +54,7 @@ fi
 exit=0
 
 for cmd in ${CURL_CMD} ${ICONV_CMD}; do
-  if ! which ${cmd} > /dev/null 2>&1; then
+  if ! which "${cmd}" > /dev/null 2>&1; then
     echo "Please install ${cmd}" >&2
     exit=1
   fi
@@ -113,12 +113,12 @@ request_file="$(mktemp -t XXXXXX)"
 trap "rm -f ${request_file}" EXIT
 
 # login to the box and get a valid SID
-challenge="$(${CURL_CMD} -sS ${baseurl}/login_sid.lua | sed -ne 's/^.*<Challenge>\([0-9a-f][0-9a-f]*\)<\/Challenge>.*$/\1/p')"
+challenge="$(${CURL_CMD} -sS "${baseurl}/login_sid.lua" | sed -ne 's/^.*<Challenge>\([0-9a-f][0-9a-f]*\)<\/Challenge>.*$/\1/p')"
 if [ -z "${challenge}" ]; then
   error "Invalid challenge received."
 fi
 
-md5hash="$(echo -n ${challenge}-${password} | ${ICONV_CMD} -f ASCII -t UTF-16LE | ${md5cmd} | awk '{print $1}')"
+md5hash="$(echo -n "${challenge}-${password}" | ${ICONV_CMD} -f ASCII -t UTF-16LE | ${md5cmd} | awk '{print $1}')"
 
 sid="$(${CURL_CMD} -sS "${baseurl}/login_sid.lua?username=${username}&response=${challenge}-${md5hash}" | sed -ne 's/^.*<SID>\([0-9a-f][0-9a-f]*\)<\/SID>.*$/\1/p')"
 if [ -z "${sid}" ] || [ "${sid}" = "0000000000000000" ]; then
@@ -130,7 +130,7 @@ certbundle=$(cat "${certpath}/fullchain.pem" "${certpath}/privkey.pem" | grep -v
 # generate our upload request
 boundary="---------------------------$(date +%Y%m%d%H%M%S)"
 
-cat <<EOD >> ${request_file}
+cat <<EOD >> "${request_file}"
 --${boundary}
 Content-Disposition: form-data; name="sid"
 
@@ -144,7 +144,7 @@ ${certbundle}
 EOD
 
 # upload the certificate to the box
-${CURL_CMD} -sS -X POST ${baseurl}/cgi-bin/firmwarecfg -H "Content-type: multipart/form-data boundary=${boundary}" --data-binary "@${request_file}" | grep -qE "${SUCCESS_MESSAGES}"
+${CURL_CMD} -sS -X POST "${baseurl}/cgi-bin/firmwarecfg" -H "Content-type: multipart/form-data boundary=${boundary}" --data-binary "@${request_file}" | grep -qE "${SUCCESS_MESSAGES}"
 if [ $? -ne 0 ]; then
   error "Could not import certificate."
 fi
