@@ -145,6 +145,7 @@ EOD
 
 # upload the certificate to the box
 ${CURL_CMD} -sS -X POST "${baseurl}/cgi-bin/firmwarecfg" -H "Content-type: multipart/form-data boundary=${boundary}" --data-binary "@${request_file}" | grep -qE "${SUCCESS_MESSAGES}"
+# shellcheck disable=SC2181
 if [ $? -ne 0 ]; then
   error "Could not import certificate."
 fi
