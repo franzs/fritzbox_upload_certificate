@@ -18,6 +18,7 @@
 # default parameters from environment
 baseurl="${FRITZBOX_BASEURL:-}"
 certpath="${FRITZBOX_CERTPATH:-}"
+keypass="${FRITZBOX_KEYPASS:-}"
 password="${FRITZBOX_PASSWORD:-}"
 username="${FRITZBOX_USERNAME:-}"
 debug="${FRITZBOX_DEBUG:-}"
@@ -31,7 +32,7 @@ SUCCESS_MESSAGES="^ *(Das SSL-Zertifikat wurde erfolgreich importiert|Import of 
 DEBUG_OUTPUT=/tmp/fritzbox.debug
 
 function usage {
-  echo "Usage: $0 [-b baseurl] [-u username] [-p password] [-c certpath]" >&2
+  echo "Usage: $0 [-b baseurl] [-u username] [-p password] [-c certpath] [-k keypass]" >&2
   exit 64
 }
 
@@ -66,7 +67,7 @@ done
 
 [ ${exit} -ne 0 ] && exit ${exit}
 
-while getopts ":b:c:dp:u:h" opt; do
+while getopts ":b:c:dk:p:u:h" opt; do
   case ${opt} in
     b)
       baseurl=$OPTARG
@@ -76,6 +77,9 @@ while getopts ":b:c:dp:u:h" opt; do
       ;;
     d)
       debug="true"
+      ;;
+    k)
+      keypass=$OPTARG
       ;;
     p)
       password=$OPTARG
@@ -181,6 +185,15 @@ Content-Type: application/octet-stream
 ${certbundle}
 --${boundary}--
 EOD
+
+if [ -n "${keypass}" ]; then
+  cat <<EOD >>"${request_file}"
+Content-Disposition: form-data; name="BoxCertPassword"
+
+${keypass}
+--${boundary}--
+EOD
+fi
 
 # upload the certificate to the box
 # shellcheck disable=SC2086
