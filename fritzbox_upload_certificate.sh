@@ -110,7 +110,7 @@ if [ ! -r "${certpath}/fullchain.pem" ] || [ ! -r "${certpath}/privkey.pem" ]; t
 fi
 
 request_file="$(mktemp -t XXXXXX)"
-trap "rm -f ${request_file}" EXIT
+trap 'rm -f "${request_file}"' EXIT
 
 # login to the box and get a valid SID
 challenge="$(${CURL_CMD} -sS "${baseurl}/login_sid.lua" | sed -ne 's/^.*<Challenge>\([0-9a-f][0-9a-f]*\)<\/Challenge>.*$/\1/p')"
