@@ -105,7 +105,7 @@ done
 
 [ ${exit} -ne 0 ] && exit ${exit}
 
-if [ ! -r "${certpath}/fullchain.pem" ] || [ ! -r "${certpath}/privkey.pem" ]; then
+if [ ! -r "${certpath}/fullchain.pem" -o ! -r "${certpath}/privkey.pem" ]; then
   error "Certpath ${certpath} must contain fullchain.pem and privkey.pem"
 fi
 
