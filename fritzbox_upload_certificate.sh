@@ -109,6 +109,10 @@ if [ ! -r "${certpath}/fullchain.pem" ] || [ ! -r "${certpath}/privkey.pem" ]; t
   error "Certpath ${certpath} must contain fullchain.pem and privkey.pem"
 fi
 
+if ! grep -q -- "-BEGIN RSA PRIVATE KEY-" "${certpath}/privkey.pem"; then
+  error "FRITZ!OS only supports RSA private keys."
+fi
+
 request_file="$(mktemp -t XXXXXX)"
 trap 'rm -f "${request_file}"' EXIT
 
