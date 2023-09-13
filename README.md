@@ -15,6 +15,10 @@ You have to provide a baseurl for your FRITZ!Box, a username, a password, and a 
 | password  | `FRITZBOX_PASSWORD` | `-p`                |
 | certpath  | `FRITZBOX_CERTPATH` | `-c`                |
 
+## Limitations
+
+Only RSA keys are [supported by FRITZ!OS](https://en.avm.de/service/knowledge-base/dok/FRITZ-Box-7590/1525_Importing-your-own-certificate-to-the-FRITZ-Box/).
+
 ## Examples
 
 Using command line options:
