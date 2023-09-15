@@ -105,11 +105,14 @@ done
 
 [ ${exit} -ne 0 ] && exit ${exit}
 
-if [ ! -r "${certpath}/fullchain.pem" ] || [ ! -r "${certpath}/privkey.pem" ]; then
+fullchain="${certpath}/fullchain.pem"
+privkey="${certpath}/privkey.pem"
+
+if [ ! -r "${fullchain}" ] || [ ! -r "${privkey}" ]; then
   error "Certpath ${certpath} must contain fullchain.pem and privkey.pem"
 fi
 
-if ! grep -q -- "-BEGIN RSA PRIVATE KEY-" "${certpath}/privkey.pem"; then
+if ! grep -q -- "-BEGIN RSA PRIVATE KEY-" "${privkey}"; then
   error "FRITZ!OS only supports RSA private keys."
 fi
 
@@ -129,7 +132,7 @@ if [ -z "${sid}" ] || [ "${sid}" = "0000000000000000" ]; then
   error "Login failed."
 fi
 
-certbundle=$(cat "${certpath}/fullchain.pem" "${certpath}/privkey.pem" | grep -v '^$')
+certbundle=$(cat "${fullchain}" "${privkey}" | grep -v '^$')
 
 # generate our upload request
 boundary="---------------------------$(date +%Y%m%d%H%M%S)"
