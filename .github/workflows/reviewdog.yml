@@ -6,6 +6,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: shfmt
+        uses: reviewdog/action-shfmt@v1
       - name: shellcheck
         uses: reviewdog/action-shellcheck@v1
         with:
