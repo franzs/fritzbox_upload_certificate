@@ -14,6 +14,9 @@ You have to provide a baseurl for your FRITZ!Box, a username, a password, and a 
 | username  | `FRITZBOX_USERNAME` | `-u`                |
 | password  | `FRITZBOX_PASSWORD` | `-p`                |
 | certpath  | `FRITZBOX_CERTPATH` | `-c`                |
+| debug     | `FRITZBOX_DEBUG`    | `-d`                |
+
+For debugging set the environment variable `FRITZBOX_DEBUG` to any non-empty string or use the command line option `-d`. The HTTP requests and responses will be written to `/tmp/fritzbox.debug` then.
 
 ## Limitations
 
