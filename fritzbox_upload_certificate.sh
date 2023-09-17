@@ -111,6 +111,9 @@ done
 
 [ ${exit} -ne 0 ] && exit ${exit}
 
+# strip trailing slash
+baseurl="${baseurl%/}"
+
 fullchain="${certpath}/fullchain.pem"
 privkey="${certpath}/privkey.pem"
 
