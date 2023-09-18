@@ -20,11 +20,14 @@ baseurl="${FRITZBOX_BASEURL:-}"
 certpath="${FRITZBOX_CERTPATH:-}"
 password="${FRITZBOX_PASSWORD:-}"
 username="${FRITZBOX_USERNAME:-}"
+debug="${FRITZBOX_DEBUG:-}"
 
 CURL_CMD="curl"
 ICONV_CMD="iconv"
 
 SUCCESS_MESSAGES="^ *(Das SSL-Zertifikat wurde erfolgreich importiert|Import of the SSL certificate was successful|El certificado SSL se ha importado correctamente|Le certificat SSL a été importé|Il certificato SSL è stato importato|Import certyfikatu SSL został pomyślnie zakończony)\.$"
+
+DEBUG_OUTPUT=/tmp/fritzbox.debug
 
 function usage {
   echo "Usage: $0 [-b baseurl] [-u username] [-p password] [-c certpath]" >&2
@@ -62,13 +65,16 @@ done
 
 [ ${exit} -ne 0 ] && exit ${exit}
 
-while getopts ":b:c:p:u:h" opt; do
+while getopts ":b:c:dp:u:h" opt; do
   case ${opt} in
     b)
       baseurl=$OPTARG
       ;;
     c)
       certpath=$OPTARG
+      ;;
+    d)
+      debug="true"
       ;;
     p)
       password=$OPTARG
@@ -105,6 +111,9 @@ done
 
 [ ${exit} -ne 0 ] && exit ${exit}
 
+# strip trailing slash
+baseurl="${baseurl%/}"
+
 fullchain="${certpath}/fullchain.pem"
 privkey="${certpath}/privkey.pem"
 
@@ -116,18 +125,40 @@ if ! grep -q -- "-BEGIN RSA PRIVATE KEY-" "${privkey}"; then
   error "FRITZ!OS only supports RSA private keys."
 fi
 
+if [ -n "${debug}" ]; then
+  curl_opts="-v -s --stderr -"
+
+  function process_curl_output {
+    grep -v '^[*{}]' | sed -e '1i\
+' | tee -a ${DEBUG_OUTPUT}
+  }
+
+  echo "Debug output will be written to ${DEBUG_OUTPUT}"
+else
+  curl_opts="-sS"
+
+  function process_curl_output {
+    cat
+  }
+fi
+
 request_file="$(mktemp -t XXXXXX)"
 trap 'rm -f "${request_file}"' EXIT
 
+echo "----------------------------------------------------------------" >>${DEBUG_OUTPUT}
+date >>${DEBUG_OUTPUT}
+
 # login to the box and get a valid SID
-challenge="$(${CURL_CMD} -sS "${baseurl}/login_sid.lua" | sed -ne 's/^.*<Challenge>\([0-9a-f][0-9a-f]*\)<\/Challenge>.*$/\1/p')"
+# shellcheck disable=SC2086
+challenge="$(${CURL_CMD} ${curl_opts} "${baseurl}/login_sid.lua" | process_curl_output | sed -ne 's/^.*<Challenge>\([0-9a-f][0-9a-f]*\)<\/Challenge>.*$/\1/p')"
 if [ -z "${challenge}" ]; then
   error "Invalid challenge received."
 fi
 
 md5hash="$(echo -n "${challenge}-${password}" | ${ICONV_CMD} -f ASCII -t UTF-16LE | ${md5cmd} | awk '{print $1}')"
 
-sid="$(${CURL_CMD} -sS "${baseurl}/login_sid.lua?username=${username}&response=${challenge}-${md5hash}" | sed -ne 's/^.*<SID>\([0-9a-f][0-9a-f]*\)<\/SID>.*$/\1/p')"
+# shellcheck disable=SC2086
+sid="$(${CURL_CMD} ${curl_opts} "${baseurl}/login_sid.lua?username=${username}&response=${challenge}-${md5hash}" | process_curl_output | sed -ne 's/^.*<SID>\([0-9a-f][0-9a-f]*\)<\/SID>.*$/\1/p')"
 if [ -z "${sid}" ] || [ "${sid}" = "0000000000000000" ]; then
   error "Login failed."
 fi
@@ -151,7 +182,8 @@ ${certbundle}
 EOD
 
 # upload the certificate to the box
-${CURL_CMD} -sS -X POST "${baseurl}/cgi-bin/firmwarecfg" -H "Content-type: multipart/form-data boundary=${boundary}" --data-binary "@${request_file}" | grep -qE "${SUCCESS_MESSAGES}"
+# shellcheck disable=SC2086
+${CURL_CMD} ${curl_opts} -X POST "${baseurl}/cgi-bin/firmwarecfg" -H "Content-type: multipart/form-data boundary=${boundary}" --data-binary "@${request_file}" | process_curl_output | grep -qE "${SUCCESS_MESSAGES}"
 # shellcheck disable=SC2181
 if [ $? -ne 0 ]; then
   error "Could not import certificate."
