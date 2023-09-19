@@ -52,6 +52,7 @@ export FRITZBOX_CERTPATH=./certificates/fritz.box
 | FRITZ!Box 7530 AX         | 7.57     | ✓      |
 | FRITZ!Box 7580            | 7.30     | ✓      |
 | FRITZ!Box 7590            | 7.29     | ✓      |
+| FRITZ!Repeater 1200 AX    | 7.57     | ✕      |
 | FRITZ!WLAN Repeater DVB-C | 7.01     | ✓      |
 
 Let me know what your results are.
