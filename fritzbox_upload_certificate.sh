@@ -26,7 +26,7 @@ CURL_CMD="curl"
 ICONV_CMD="iconv"
 OPENSSL_CMD="openssl"
 
-SUCCESS_MESSAGES="^ *(Das SSL-Zertifikat wurde erfolgreich importiert|Import of the SSL certificate was successful|El certificado SSL se ha importado correctamente|Le certificat SSL a été importé|Il certificato SSL è stato importato|Import certyfikatu SSL został pomyślnie zakończony)\.$"
+SUCCESS_MESSAGES="^ *(Das SSL-Zertifikat wurde erfolgreich importiert|Import of the SSL certificate was successful|El certificado SSL se ha importado correctamente|Le certificat SSL a été importé|Il certificato SSL è stato importato|Import certyfikatu SSL został pomyślnie zakończony)"
 
 DEBUG_OUTPUT=/tmp/fritzbox.debug
 
@@ -59,8 +59,7 @@ exit=0
 
 for cmd in ${CURL_CMD} ${ICONV_CMD} ${OPENSSL_CMD}; do
   if ! which "${cmd}" >/dev/null 2>&1; then
-    echo "Please install ${cmd}" >&2
-    exit=1
+    error "Please install ${cmd}" >&2
   fi
 done
 
@@ -188,4 +187,6 @@ ${CURL_CMD} ${curl_opts} -X POST "${baseurl}/cgi-bin/firmwarecfg" -H "Content-ty
 # shellcheck disable=SC2181
 if [ $? -ne 0 ]; then
   error "Could not import certificate."
+else
+  echo "Import of the SSL certificate was successful"
 fi
