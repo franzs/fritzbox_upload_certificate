@@ -45,6 +45,7 @@ export FRITZBOX_CERTPATH=./certificates/fritz.box
 | Device                    | FRITZ!OS | works? |
 | ------------------------- | -------- | ------ |
 | FRITZ!Box 5530 Fiber      | 7.81     | ✅     |
+| FRITZ!Box 5590 Fiber      | 8.02     | ✅     |
 | FRITZ!Box 6490 Cable      | 7.20     | ✅     |
 | FRITZ!Box 6660 Cable      | 7.57     | ✅     |
 | FRITZ!Box 7360            | 6.86     | ✅     |
