@@ -53,16 +53,16 @@ if [ -z "${md5cmd}" ]; then
   error "Missing command for calculating MD5 hash"
 fi
 
-exit=0
+exit_code=0
 
 for cmd in ${CURL_CMD} ${ICONV_CMD} ${OPENSSL_CMD}; do
   if ! command -v "${cmd}" >/dev/null 2>&1; then
     echo "Please install ${cmd}" >&2
-    exit=1
+    exit_code=1
   fi
 done
 
-[ ${exit} -ne 0 ] && exit ${exit}
+[ ${exit_code} -ne 0 ] && exit ${exit_code}
 
 while getopts ":b:c:dp:u:h" opt; do
   case ${opt} in
@@ -99,16 +99,16 @@ done
 
 shift $((OPTIND - 1))
 
-exit=0
+exit_code=0
 
 for var in baseurl certpath username password; do
   if [ -z "${!var}" ]; then
     echo "Please set ${var}" >&2
-    exit=1
+    exit_code=1
   fi
 done
 
-[ ${exit} -ne 0 ] && exit ${exit}
+[ ${exit_code} -ne 0 ] && exit ${exit_code}
 
 # strip trailing slash
 baseurl="${baseurl%/}"
