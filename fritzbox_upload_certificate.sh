@@ -43,7 +43,7 @@ function error {
 md5cmd=
 
 for cmd in md5 md5sum; do
-  if which "${cmd}" >/dev/null 2>&1; then
+  if command -v "${cmd}" >/dev/null 2>&1; then
     md5cmd=${cmd}
     break
   fi
@@ -56,7 +56,7 @@ fi
 exit=0
 
 for cmd in ${CURL_CMD} ${ICONV_CMD} ${OPENSSL_CMD}; do
-  if ! which "${cmd}" >/dev/null 2>&1; then
+  if ! command -v "${cmd}" >/dev/null 2>&1; then
     echo "Please install ${cmd}" >&2
     exit=1
   fi
