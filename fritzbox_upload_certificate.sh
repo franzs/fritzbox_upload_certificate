@@ -28,8 +28,6 @@ OPENSSL_CMD="openssl"
 
 SUCCESS_MESSAGES="^ *(Das SSL-Zertifikat wurde erfolgreich importiert|Import of the SSL certificate was successful|El certificado SSL se ha importado correctamente|Le certificat SSL a été importé|Il certificato SSL è stato importato( correttamente)?|Import certyfikatu SSL został pomyślnie zakończony)\.$"
 
-DEBUG_OUTPUT=/tmp/fritzbox.debug
-
 function usage {
   echo "Usage: $0 [-b baseurl] [-u username] [-p password] [-c certpath]" >&2
   exit 64
@@ -127,14 +125,16 @@ if ! ${OPENSSL_CMD} rsa -in "${privkey}" -check -noout &>/dev/null; then
 fi
 
 if [ -n "${debug}" ]; then
+  debug_output="$(mktemp -t fritzbox_debug.XXXXXX)"
+
   curl_opts="-v -s --stderr -"
 
   function process_curl_output {
     grep -v '^[*{}]' | sed -e '1i\
-' | tee -a ${DEBUG_OUTPUT}
+' | tee -a "${debug_output}"
   }
 
-  echo "Debug output will be written to ${DEBUG_OUTPUT}"
+  echo "Debug output will be written to ${debug_output}"
 else
   curl_opts="-sS"
 
@@ -145,9 +145,6 @@ fi
 
 request_file="$(mktemp -t XXXXXX)"
 trap 'rm -f "${request_file}"' EXIT
-
-echo "----------------------------------------------------------------" >>${DEBUG_OUTPUT}
-date >>${DEBUG_OUTPUT}
 
 # login to the box and get a valid SID
 # shellcheck disable=SC2086
