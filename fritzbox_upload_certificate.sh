@@ -144,7 +144,16 @@ else
 fi
 
 request_file="$(mktemp -t XXXXXX)"
-trap 'rm -f "${request_file}"' EXIT
+cleanup() {
+  rm -f "${request_file}"
+
+  if [ -n "${sid:-}" ] && [ "${sid}" != "0000000000000000" ]; then
+    # shellcheck disable=SC2086
+    ${CURL_CMD} ${curl_opts} "${baseurl}/login_sid.lua?logout=1&sid=${sid}" | process_curl_output >/dev/null || true
+  fi
+}
+
+trap cleanup EXIT INT TERM
 
 # login to the box and get a valid SID
 # shellcheck disable=SC2086
