@@ -22,6 +22,8 @@ password="${FRITZBOX_PASSWORD:-}"
 username="${FRITZBOX_USERNAME:-}"
 debug="${FRITZBOX_DEBUG:-}"
 
+tmp_dir="${TMPDIR:-/tmp}"
+
 CURL_CMD="curl"
 ICONV_CMD="iconv"
 OPENSSL_CMD="openssl"
@@ -125,7 +127,7 @@ if ! ${OPENSSL_CMD} rsa -in "${privkey}" -check -noout &>/dev/null; then
 fi
 
 if [ -n "${debug}" ]; then
-  debug_output="$(mktemp -t fritzbox_debug.XXXXXX)"
+  debug_output="$(mktemp "${tmp_dir}/fritzbox_debug.XXXXXX")"
 
   curl_opts="-v -s --stderr -"
 
@@ -143,7 +145,8 @@ else
   }
 fi
 
-request_file="$(mktemp -t XXXXXX)"
+request_file="$(mktemp "${tmp_dir}/request.XXXXXX")"
+
 cleanup() {
   rm -f "${request_file}"
 
