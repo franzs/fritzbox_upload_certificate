@@ -129,7 +129,7 @@ fi
 if [ -n "${debug}" ]; then
   debug_output="$(mktemp "${tmp_dir}/fritzbox_debug.XXXXXX")"
 
-  curl_opts="-v -s --stderr -"
+  curl_opts=(-v -s --stderr -)
 
   function process_curl_output {
     grep -v '^[*{}]' | sed -e '1i\
@@ -138,7 +138,7 @@ if [ -n "${debug}" ]; then
 
   echo "Debug output will be written to ${debug_output}"
 else
-  curl_opts="-sS"
+  curl_opts=(-sS)
 
   function process_curl_output {
     cat
@@ -151,24 +151,21 @@ cleanup() {
   rm -f "${request_file}"
 
   if [ -n "${sid:-}" ] && [ "${sid}" != "0000000000000000" ]; then
-    # shellcheck disable=SC2086
-    ${CURL_CMD} ${curl_opts} "${baseurl}/login_sid.lua?logout=1&sid=${sid}" | process_curl_output >/dev/null || true
+    ${CURL_CMD} "${curl_opts[@]}" "${baseurl}/login_sid.lua?logout=1&sid=${sid}" | process_curl_output >/dev/null || true
   fi
 }
 
 trap cleanup EXIT INT TERM
 
 # login to the box and get a valid SID
-# shellcheck disable=SC2086
-challenge="$(${CURL_CMD} ${curl_opts} "${baseurl}/login_sid.lua" | process_curl_output | sed -ne 's/^.*<Challenge>\([0-9a-f][0-9a-f]*\)<\/Challenge>.*$/\1/p')"
+challenge="$(${CURL_CMD} "${curl_opts[@]}" "${baseurl}/login_sid.lua" | process_curl_output | sed -ne 's/^.*<Challenge>\([0-9a-f][0-9a-f]*\)<\/Challenge>.*$/\1/p')"
 if [ -z "${challenge}" ]; then
   error "Invalid challenge received."
 fi
 
 md5hash="$(echo -n "${challenge}-${password}" | ${ICONV_CMD} -f ASCII -t UTF-16LE | ${md5cmd} | awk '{print $1}')"
 
-# shellcheck disable=SC2086
-sid="$(${CURL_CMD} ${curl_opts} "${baseurl}/login_sid.lua?username=${username}&response=${challenge}-${md5hash}" | process_curl_output | sed -ne 's/^.*<SID>\([0-9a-f][0-9a-f]*\)<\/SID>.*$/\1/p')"
+sid="$(${CURL_CMD} "${curl_opts[@]}" "${baseurl}/login_sid.lua?username=${username}&response=${challenge}-${md5hash}" | process_curl_output | sed -ne 's/^.*<SID>\([0-9a-f][0-9a-f]*\)<\/SID>.*$/\1/p')"
 if [ -z "${sid}" ] || [ "${sid}" = "0000000000000000" ]; then
   error "Login failed."
 fi
@@ -192,8 +189,7 @@ ${certbundle}
 EOD
 
 # upload the certificate to the box
-# shellcheck disable=SC2086
-${CURL_CMD} ${curl_opts} -X POST "${baseurl}/cgi-bin/firmwarecfg" -H "Content-type: multipart/form-data boundary=${boundary}" --data-binary "@${request_file}" | process_curl_output | grep -qE "${SUCCESS_MESSAGES}"
+${CURL_CMD} "${curl_opts[@]}" -X POST "${baseurl}/cgi-bin/firmwarecfg" -H "Content-type: multipart/form-data boundary=${boundary}" --data-binary "@${request_file}" | process_curl_output | grep -qE "${SUCCESS_MESSAGES}"
 # shellcheck disable=SC2181
 if [ $? -ne 0 ]; then
   error "Could not import certificate."
