@@ -18,9 +18,9 @@
 # default parameters from environment
 baseurl="${FRITZBOX_BASEURL:-}"
 certpath="${FRITZBOX_CERTPATH:-}"
+debug="${FRITZBOX_DEBUG:-}"
 password="${FRITZBOX_PASSWORD:-}"
 username="${FRITZBOX_USERNAME:-}"
-debug="${FRITZBOX_DEBUG:-}"
 
 tmp_dir="${TMPDIR:-/tmp}"
 
