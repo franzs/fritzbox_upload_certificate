@@ -29,13 +29,22 @@ Only RSA keys are [supported by FRITZ!OS](https://en.avm.de/service/knowledge-ba
 Using command line options:
 
 ```shell
-./fritzbox_upload_certificate.sh -b http://fritz.box -u admin -p secret -c ./certificates/fritz.box
+./fritzbox_upload_certificate.sh \
+  -b http://fritz.box \
+  -u admin \
+  -p secret \
+  -c ./certificates/fritz.box
 ```
 
 or
 
 ```shell
-./fritzbox_upload_certificate.sh -b http://fritz.box -u admin -p secret -f ./.lego/certificates/fritz.box.crt -k ./.lego/certificates/fritz.box.key
+./fritzbox_upload_certificate.sh \
+  -b http://fritz.box \
+  -u admin \
+  -p secret \
+  -f ./.lego/certificates/fritz.box.crt \
+  -k ./.lego/certificates/fritz.box.key
 ```
 
 Using environment variables:
