@@ -6,7 +6,7 @@ The idea was taken from https://gist.github.com/wikrie/f1d5747a714e0a34d0582981f
 
 ## Usage
 
-You have to provide a baseurl for your FRITZ!Box, a username, a password, and a certpath to contain `fullchain.pem` and `privkey.pem`. This can be done using environment variables or command line options. Command line options have a higher precedence.
+You have to provide a baseurl for your FRITZ!Box, a username, a password, and a certpath to contain `fullchain.pem` and `privkey.pem`. Optionally you can specify a key password. This can be done using environment variables or command line options. Command line options have a higher precedence.
 
 | Parameter | Environment         | Command line option |
 | --------- | ------------------- | ------------------- |
@@ -14,6 +14,7 @@ You have to provide a baseurl for your FRITZ!Box, a username, a password, and a 
 | username  | `FRITZBOX_USERNAME` | `-u`                |
 | password  | `FRITZBOX_PASSWORD` | `-p`                |
 | certpath  | `FRITZBOX_CERTPATH` | `-c`                |
+| keypass   | `FRITZBOX_KEYPASS ` | `-k`                |
 | debug     | `FRITZBOX_DEBUG`    | `-d`                |
 
 For debugging set the environment variable `FRITZBOX_DEBUG` to any non-empty string or use the command line option `-d`. The HTTP requests and responses will be written to `/tmp/fritzbox.debug` then.
