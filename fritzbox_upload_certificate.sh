@@ -18,9 +18,11 @@
 # default parameters from environment
 baseurl="${FRITZBOX_BASEURL:-}"
 certpath="${FRITZBOX_CERTPATH:-}"
-password="${FRITZBOX_PASSWORD:-}"
-username="${FRITZBOX_USERNAME:-}"
 debug="${FRITZBOX_DEBUG:-}"
+fullchain="${FRITZBOX_FULLCHAIN:-}"
+password="${FRITZBOX_PASSWORD:-}"
+privkey="${FRITZBOX_PRIVKEY:-}"
+username="${FRITZBOX_USERNAME:-}"
 
 tmp_dir="${TMPDIR:-/tmp}"
 
@@ -31,7 +33,7 @@ OPENSSL_CMD="openssl"
 SUCCESS_MESSAGES="^ *(Das SSL-Zertifikat wurde erfolgreich importiert|Import of the SSL certificate was successful|El certificado SSL se ha importado correctamente|Le certificat SSL a été importé|Il certificato SSL è stato importato( correttamente)?|Import certyfikatu SSL został pomyślnie zakończony)\.$"
 
 function usage {
-  echo "Usage: $0 [-b baseurl] [-u username] [-p password] [-c certpath]" >&2
+  echo "Usage: $0 [-b baseurl] [-u username] [-p password] [[-c certpath]|[-f fullchain] [-k privkey]]" >&2
   exit 64
 }
 
@@ -66,7 +68,7 @@ done
 
 [ ${exit_code} -ne 0 ] && exit ${exit_code}
 
-while getopts ":b:c:dp:u:h" opt; do
+while getopts ":b:c:df:k:p:u:h" opt; do
   case ${opt} in
     b)
       baseurl=$OPTARG
@@ -76,6 +78,12 @@ while getopts ":b:c:dp:u:h" opt; do
       ;;
     d)
       debug="true"
+      ;;
+    f)
+      fullchain=$OPTARG
+      ;;
+    k)
+      privkey=$OPTARG
       ;;
     p)
       password=$OPTARG
@@ -103,20 +111,27 @@ shift $((OPTIND - 1))
 
 exit_code=0
 
-for var in baseurl certpath username password; do
+for var in baseurl username password; do
   if [ -z "${!var}" ]; then
     echo "Please set ${var}" >&2
     exit_code=1
   fi
 done
 
+if [[ (-z "${certpath}" && (-z "${fullchain}" || -z "${privkey}")) || (-n "${certpath}" && (-n "${fullchain}" || -n "${privkey}")) ]]; then
+  echo "Either certpath or fullchain and privkey have to be set." >&2
+  exit_code=1
+fi
+
 [ ${exit_code} -ne 0 ] && exit ${exit_code}
 
 # strip trailing slash
 baseurl="${baseurl%/}"
 
-fullchain="${certpath}/fullchain.pem"
-privkey="${certpath}/privkey.pem"
+if [ -n "${certpath}" ]; then
+  fullchain="${certpath}/fullchain.pem"
+  privkey="${certpath}/privkey.pem"
+fi
 
 if [ ! -r "${fullchain}" ] || [ ! -r "${privkey}" ]; then
   error "Certpath ${certpath} must contain fullchain.pem and privkey.pem"
