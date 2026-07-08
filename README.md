@@ -76,6 +76,7 @@ export FRITZBOX_PRIVKEY=./.lego/certificates/fritz.box.key
 | FRITZ!Box 5590 Fiber      | 8.02     | ✅     |
 | FRITZ!Box 6490 Cable      | 7.20     | ✅     |
 | FRITZ!Box 6660 Cable      | 7.57     | ✅     |
+| FRITZ!Box 6690 Cable      | 8.21     | ✅     |
 | FRITZ!Box 7360            | 6.86     | ✅     |
 | FRITZ!Box 7490            | 7.12     | ✅     |
 | FRITZ!Box 7490            | 7.57     | ✅     |
