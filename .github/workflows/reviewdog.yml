@@ -8,6 +8,8 @@ jobs:
       - uses: actions/checkout@v6
       - name: shfmt
         uses: reviewdog/action-shfmt@v1
+        with:
+          shfmt_flags: -i 2 -ci
       - name: shellcheck
         uses: reviewdog/action-shellcheck@v1
         with:
