@@ -5,10 +5,12 @@ jobs:
     name: runner / reviewdog
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: shfmt
-        uses: reviewdog/action-shfmt@v1
+        uses: reviewdog/action-shfmt@c5e3ba7497c338866921924691aef4fa18bc1fe0
+        with:
+          shfmt_flags: -i 2 -ci
       - name: shellcheck
-        uses: reviewdog/action-shellcheck@v1
+        uses: reviewdog/action-shellcheck@4c07458293ac342d477251099501a718ae5ef86e
         with:
           reporter: github-pr-review
