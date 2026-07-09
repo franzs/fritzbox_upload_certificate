@@ -5,7 +5,7 @@ jobs:
     name: runner / reviewdog
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: shfmt
         uses: reviewdog/action-shfmt@c5e3ba7497c338866921924691aef4fa18bc1fe0
         with:
