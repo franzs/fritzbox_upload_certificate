@@ -24,6 +24,8 @@ For debugging set the environment variable `FRITZBOX_DEBUG` to any non-empty str
 
 Older Fritz!OS versions support RSA keys only. Newer versions support EC keys, too. EC key support was confirmed with Fritz!OS version 8.25. If a certificate cannot be imported, it is worth checking the key type.
 
+This script currently only implements the legacy MD5 challenge-response login. FRITZ!OS >= 7.24 also offers a PBKDF2-based login (via `login_sid.lua?version=2`), which is not supported yet. Computing a PBKDF2 response requires OpenSSL >= 3.0 (`openssl kdf`) which is not available at a large scale yet. As login always happens over TLS, and MD5 is only used inside that encrypted channel, this is considered an acceptable trade-off for now, **provided you never run curl with `-k`/`--insecure`**. PBKDF2 support may be added later once OpenSSL >= 3.0 is more widely available.
+
 ## Examples
 
 Using command line options:
