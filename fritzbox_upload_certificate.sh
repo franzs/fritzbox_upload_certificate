@@ -184,7 +184,7 @@ fi
 certbundle=$(cat "${fullchain}" "${privkey}" | grep -v '^$')
 
 # generate our upload request
-boundary="---------------------------$(date +%Y%m%d%H%M%S)"
+boundary="---------------------------$(${OPENSSL_CMD} rand -hex 20)"
 
 cat <<EOD >>"${request_file}"
 --${boundary}
