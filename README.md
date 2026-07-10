@@ -22,7 +22,7 @@ For debugging set the environment variable `FRITZBOX_DEBUG` to any non-empty str
 
 ## Limitations
 
-Only RSA keys are [supported by FRITZ!OS](https://en.avm.de/service/knowledge-base/dok/FRITZ-Box-7590/1525_Importing-your-own-certificate-to-the-FRITZ-Box/).
+Older Fritz!OS versions support RSA keys only. Newer versions support EC keys, too. EC key support was confirmed with Fritz!OS version 8.25. If a certificate cannot be imported, it is worth checking the key type.
 
 ## Examples
 

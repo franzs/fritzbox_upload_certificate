@@ -137,10 +137,6 @@ if [ ! -r "${fullchain}" ] || [ ! -r "${privkey}" ]; then
   error "Certpath ${certpath} must contain fullchain.pem and privkey.pem"
 fi
 
-if ! ${OPENSSL_CMD} rsa -in "${privkey}" -check -noout &>/dev/null; then
-  error "FRITZ!OS only supports RSA private keys."
-fi
-
 if [ -n "${debug}" ]; then
   debug_output="$(mktemp "${tmp_dir}/fritzbox_debug.XXXXXX")"
 
@@ -207,5 +203,5 @@ EOD
 ${CURL_CMD} "${curl_opts[@]}" -X POST "${baseurl}/cgi-bin/firmwarecfg" -H "Content-type: multipart/form-data boundary=${boundary}" --data-binary "@${request_file}" | process_curl_output | grep -qE "${SUCCESS_MESSAGES}"
 # shellcheck disable=SC2181
 if [ $? -ne 0 ]; then
-  error "Could not import certificate."
+  error "Could not import certificate. Maybe an unsupported key type was used. Older Fritz!OS versions support RSA keys only."
 fi
