@@ -153,7 +153,7 @@ fi
 if [ -n "${debug}" ]; then
   debug_output="$(mktemp "${tmp_dir}/fritzbox_debug.XXXXXX")"
 
-  curl_opts=(-v -s --stderr -)
+  curl_opts=(--verbose --silent --stderr -)
 
   function process_curl_output {
     grep -v '^[*{}]' | sed -e '1i\
@@ -162,7 +162,7 @@ if [ -n "${debug}" ]; then
 
   echo "Debug output will be written to ${debug_output}"
 else
-  curl_opts=(-sS)
+  curl_opts=(--silent --show-error)
 
   function process_curl_output {
     cat
@@ -213,7 +213,7 @@ ${certbundle}
 EOD
 
 # upload the certificate to the box
-${CURL_CMD} "${curl_opts[@]}" -X POST "${baseurl}/cgi-bin/firmwarecfg" -H "Content-type: multipart/form-data; boundary=${boundary}" --data-binary "@${request_file}" | process_curl_output | grep -qE "${SUCCESS_MESSAGES}"
+${CURL_CMD} "${curl_opts[@]}" --request POST "${baseurl}/cgi-bin/firmwarecfg" --header "Content-type: multipart/form-data; boundary=${boundary}" --data-binary "@${request_file}" | process_curl_output | grep -qE "${SUCCESS_MESSAGES}"
 # shellcheck disable=SC2181
 if [ $? -ne 0 ]; then
   error "Could not import certificate. Maybe an unsupported key type was used. Older Fritz!OS versions support RSA keys only."
