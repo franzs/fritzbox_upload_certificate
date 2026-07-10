@@ -200,7 +200,7 @@ ${certbundle}
 EOD
 
 # upload the certificate to the box
-${CURL_CMD} "${curl_opts[@]}" -X POST "${baseurl}/cgi-bin/firmwarecfg" -H "Content-type: multipart/form-data boundary=${boundary}" --data-binary "@${request_file}" | process_curl_output | grep -qE "${SUCCESS_MESSAGES}"
+${CURL_CMD} "${curl_opts[@]}" -X POST "${baseurl}/cgi-bin/firmwarecfg" -H "Content-type: multipart/form-data; boundary=${boundary}" --data-binary "@${request_file}" | process_curl_output | grep -qE "${SUCCESS_MESSAGES}"
 # shellcheck disable=SC2181
 if [ $? -ne 0 ]; then
   error "Could not import certificate. Maybe an unsupported key type was used. Older Fritz!OS versions support RSA keys only."
