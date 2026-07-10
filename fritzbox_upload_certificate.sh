@@ -118,6 +118,10 @@ for var in baseurl username password; do
   fi
 done
 
+# certpath XOR (fullchain AND privkey) must be set
+using_certpath="false"
+[ -n "${certpath}" ] && using_certpath="true"
+
 if [[ (-z "${certpath}" && (-z "${fullchain}" || -z "${privkey}")) || (-n "${certpath}" && (-n "${fullchain}" || -n "${privkey}")) ]]; then
   echo "Either certpath or fullchain and privkey have to be set." >&2
   exit_code=1
@@ -128,13 +132,17 @@ fi
 # strip trailing slash
 baseurl="${baseurl%/}"
 
-if [ -n "${certpath}" ]; then
+if [ "${using_certpath}" = "true" ]; then
   fullchain="${certpath}/fullchain.pem"
   privkey="${certpath}/privkey.pem"
 fi
 
 if [ ! -r "${fullchain}" ] || [ ! -r "${privkey}" ]; then
-  error "Certpath ${certpath} must contain fullchain.pem and privkey.pem"
+  if [ "${using_certpath}" = "true" ]; then
+    error "Certpath ${certpath} must contain fullchain.pem and privkey.pem"
+  else
+    error "fullchain (${fullchain}) and privkey (${privkey}) must both be readable files"
+  fi
 fi
 
 if [ -n "${debug}" ]; then
@@ -184,7 +192,7 @@ fi
 certbundle=$(cat "${fullchain}" "${privkey}" | grep -v '^$')
 
 # generate our upload request
-boundary="---------------------------$(date +%Y%m%d%H%M%S)"
+boundary="---------------------------$(${OPENSSL_CMD} rand -hex 20)"
 
 cat <<EOD >>"${request_file}"
 --${boundary}
@@ -200,7 +208,7 @@ ${certbundle}
 EOD
 
 # upload the certificate to the box
-${CURL_CMD} "${curl_opts[@]}" -X POST "${baseurl}/cgi-bin/firmwarecfg" -H "Content-type: multipart/form-data boundary=${boundary}" --data-binary "@${request_file}" | process_curl_output | grep -qE "${SUCCESS_MESSAGES}"
+${CURL_CMD} "${curl_opts[@]}" -X POST "${baseurl}/cgi-bin/firmwarecfg" -H "Content-type: multipart/form-data; boundary=${boundary}" --data-binary "@${request_file}" | process_curl_output | grep -qE "${SUCCESS_MESSAGES}"
 # shellcheck disable=SC2181
 if [ $? -ne 0 ]; then
   error "Could not import certificate. Maybe an unsupported key type was used. Older Fritz!OS versions support RSA keys only."
