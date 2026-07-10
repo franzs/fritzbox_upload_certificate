@@ -20,6 +20,7 @@ baseurl="${FRITZBOX_BASEURL:-}"
 certpath="${FRITZBOX_CERTPATH:-}"
 debug="${FRITZBOX_DEBUG:-}"
 fullchain="${FRITZBOX_FULLCHAIN:-}"
+keypass="${FRITZBOX_KEYPASS:-}"
 password="${FRITZBOX_PASSWORD:-}"
 privkey="${FRITZBOX_PRIVKEY:-}"
 username="${FRITZBOX_USERNAME:-}"
@@ -33,7 +34,7 @@ OPENSSL_CMD="openssl"
 SUCCESS_MESSAGES="^ *(Das SSL-Zertifikat wurde erfolgreich importiert|Import of the SSL certificate was successful|El certificado SSL se ha importado correctamente|Le certificat SSL a été importé|Il certificato SSL è stato importato( correttamente)?|Import certyfikatu SSL został pomyślnie zakończony)\.$"
 
 function usage {
-  echo "Usage: $0 [-b baseurl] [-u username] [-p password] [[-c certpath]|[-f fullchain] [-k privkey]]" >&2
+  echo "Usage: $0 [-b baseurl] [-u username] [-p password] [[-c certpath]|[-f fullchain] [-k privkey]] [-x key_password]" >&2
   exit 64
 }
 
@@ -68,7 +69,7 @@ done
 
 [ ${exit_code} -ne 0 ] && exit ${exit_code}
 
-while getopts ":b:c:df:k:p:u:h" opt; do
+while getopts ":b:c:df:k:p:u:hx:" opt; do
   case ${opt} in
     b)
       baseurl=$OPTARG
@@ -93,6 +94,9 @@ while getopts ":b:c:df:k:p:u:h" opt; do
       ;;
     h)
       usage
+      ;;
+    x)
+      keypass=$OPTARG
       ;;
     \?)
       echo "Invalid option: $OPTARG" >&2
@@ -211,6 +215,14 @@ Content-Type: application/octet-stream
 ${certbundle}
 --${boundary}--
 EOD
+
+if [ -n "${keypass}" ]; then
+  cat <<EOD >>"${request_file}"
+Content-Disposition: form-data; name="BoxCertPassword"
+${keypass}
+--${boundary}--
+EOD
+fi
 
 # upload the certificate to the box
 ${CURL_CMD} "${curl_opts[@]}" --request POST "${baseurl}/cgi-bin/firmwarecfg" --header "Content-type: multipart/form-data; boundary=${boundary}" --data-binary "@${request_file}" | process_curl_output | grep -qE "${SUCCESS_MESSAGES}"
