@@ -28,7 +28,6 @@ tmp_dir="${TMPDIR:-/tmp}"
 
 CURL_CMD="curl"
 ICONV_CMD="iconv"
-OPENSSL_CMD="openssl"
 
 SUCCESS_MESSAGES="^ *(Das SSL-Zertifikat wurde erfolgreich importiert|Import of the SSL certificate was successful|El certificado SSL se ha importado correctamente|Le certificat SSL a été importé|Il certificato SSL è stato importato( correttamente)?|Import certyfikatu SSL został pomyślnie zakończony)\.$"
 
@@ -59,7 +58,7 @@ fi
 
 exit_code=0
 
-for cmd in ${CURL_CMD} ${ICONV_CMD} ${OPENSSL_CMD}; do
+for cmd in ${CURL_CMD} ${ICONV_CMD}; do
   if ! command -v "${cmd}" >/dev/null 2>&1; then
     echo "Please install ${cmd}" >&2
     exit_code=1
