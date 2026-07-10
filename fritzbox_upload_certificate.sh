@@ -132,6 +132,11 @@ fi
 # strip trailing slash
 baseurl="${baseurl%/}"
 
+# if no schema was given, default to https
+if [[ "${baseurl}" != *://* ]]; then
+  baseurl="https://${baseurl}"
+fi
+
 if [ "${using_certpath}" = "true" ]; then
   fullchain="${certpath}/fullchain.pem"
   privkey="${certpath}/privkey.pem"
